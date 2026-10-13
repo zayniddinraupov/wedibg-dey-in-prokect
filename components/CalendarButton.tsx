@@ -1,6 +1,7 @@
 'use client';
 
 import { InviteConfig } from '@/lib/types';
+import { EVENTS, joinNames } from '@/lib/events';
 
 function pad2(n: number) {
   return n < 10 ? '0' + n : String(n);
@@ -19,15 +20,19 @@ function toICSDate(d: Date) {
   );
 }
 
+// Значения в .ics не должны содержать переводов строк и спецсимволов
+function ics(s: string) {
+  return s.replace(/[\r\n]+/g, ' ').replace(/([,;\\])/g, '\\$1');
+}
+
 export default function CalendarButton({ config }: { config: InviteConfig }) {
   if (!config.eventDate) return null;
 
   const handleClick = () => {
     const start = new Date(`${config.eventDate}T${config.eventTime || '00:00'}:00`);
     const end = new Date(start.getTime() + 2 * 60 * 60 * 1000);
-    const names = config.name1 + (config.name2 ? ' & ' + config.name2 : '');
-    const summary =
-      (config.type === 'wedding' ? 'Свадьба' : 'День рождения') + (names ? ' ' + names : '');
+    const names = joinNames(config.type, config.name1, config.name2);
+    const summary = `${(EVENTS[config.type] || EVENTS.wedding).calendarLabel} ${names}`.trim();
 
     const lines = [
       'BEGIN:VCALENDAR',
@@ -35,9 +40,9 @@ export default function CalendarButton({ config }: { config: InviteConfig }) {
       'BEGIN:VEVENT',
       `DTSTART:${toICSDate(start)}`,
       `DTEND:${toICSDate(end)}`,
-      `SUMMARY:${summary}`,
-      `LOCATION:${config.venueName || ''}`,
-      `DESCRIPTION:${config.intro || ''}`,
+      `SUMMARY:${ics(summary)}`,
+      `LOCATION:${ics(config.venueName || '')}`,
+      `DESCRIPTION:${ics(config.intro || '')}`,
       'END:VEVENT',
       'END:VCALENDAR',
     ].join('\r\n');

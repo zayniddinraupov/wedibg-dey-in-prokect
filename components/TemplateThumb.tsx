@@ -1,9 +1,17 @@
 import { CSSProperties } from 'react';
-import { ThemeId } from '@/lib/types';
+import { InviteType, ThemeId } from '@/lib/types';
+import { EVENTS } from '@/lib/events';
 import { themes } from '@/lib/themes';
 import Decorations from './Decorations';
 
-export default function TemplateThumb({ themeId }: { themeId: ThemeId }) {
+export default function TemplateThumb({
+  themeId,
+  type,
+}: {
+  themeId: ThemeId;
+  type: InviteType;
+}) {
+  const ev = EVENTS[type];
   const t = themes[themeId];
 
   const style: CSSProperties = {
@@ -25,7 +33,7 @@ export default function TemplateThumb({ themeId }: { themeId: ThemeId }) {
       <Decorations theme={themeId} />
       <div className="relative z-10 flex h-full flex-col items-center justify-center px-4 text-center">
         <div style={{ fontFamily: t.fontBody, fontSize: 11, color: t.accent, letterSpacing: 0.2 }}>
-          Пример оформления
+          {ev.kicker}
         </div>
         <div
           style={{
@@ -36,7 +44,7 @@ export default function TemplateThumb({ themeId }: { themeId: ThemeId }) {
             lineHeight: 1.15,
           }}
         >
-          Анна &amp; Дмитрий
+          {ev.sampleNames}
         </div>
         <div
           style={{

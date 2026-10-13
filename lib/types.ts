@@ -1,4 +1,4 @@
-export type InviteType = 'wedding' | 'birthday';
+export type InviteType = 'wedding' | 'birthday' | 'jubilee' | 'nahor' | 'fotiha';
 
 export type ThemeId =
   | 'botanical'
@@ -8,7 +8,23 @@ export type ThemeId =
   | 'confetti'
   | 'space'
   | 'retro'
-  | 'balloons';
+  | 'balloons'
+  | 'gold'
+  | 'champagne'
+  | 'samarkand'
+  | 'saffron'
+  | 'emerald'
+  | 'pearl';
+
+export type CoverStyle = 'envelope' | 'curtains' | 'seal' | 'simple' | 'none';
+
+export interface ProgramItem {
+  time: string;
+  title: string;
+  text?: string;
+}
+
+export type ParticleType = 'none' | 'hearts' | 'stars' | 'confetti' | 'balloons' | 'bubbles';
 
 export interface GiftsBlock {
   enabled: boolean;
@@ -18,6 +34,17 @@ export interface GiftsBlock {
 export interface DressCodeBlock {
   enabled: boolean;
   text: string;
+  palette?: string[]; // цвета «в тон», до 6 штук, формат #rrggbb
+}
+
+export interface ProgramBlock {
+  enabled: boolean;
+  items: ProgramItem[];
+}
+
+export interface CoverConfig {
+  style: CoverStyle;
+  hint?: string;
 }
 
 export interface RsvpBlock {
@@ -26,9 +53,17 @@ export interface RsvpBlock {
   email?: string;
 }
 
+export interface BackgroundMedia {
+  kind: 'image' | 'video';
+  url: string;
+  dim: number; // 0-90: насколько фон «приглушён» цветом темы, чтобы текст читался
+}
+
 export interface InviteConfig {
+  slug?: string; // нужен, чтобы ответы гостей сохранялись в базе
   type: InviteType;
   theme: ThemeId;
+  particles?: ParticleType;
 
   name1: string;
   name2?: string;
@@ -39,12 +74,15 @@ export interface InviteConfig {
 
   venueName?: string;
   venueAddress?: string;
-  venuePhoto?: string; // путь в /public, напр. '/venue.jpg'
-  coverPhoto?: string; // путь в /public, напр. '/cover.jpg'
-  musicSrc?: string; // путь в /public, напр. '/music.mp3'
+  venuePhoto?: string;
+  coverPhoto?: string;
+  background?: BackgroundMedia; // фото или видео на заднем плане всей страницы
+  musicSrc?: string;
 
   gifts?: GiftsBlock;
   dressCode?: DressCodeBlock;
+  program?: ProgramBlock;
+  cover?: CoverConfig;
   rsvp?: RsvpBlock;
   calendarEnabled?: boolean;
   publishedUrl?: string;

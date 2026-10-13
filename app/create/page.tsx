@@ -1,22 +1,26 @@
+import SiteNav from '@/components/SiteNav';
 import ConstructorForm from '@/components/ConstructorForm';
 import { InviteType, ThemeId } from '@/lib/types';
-import { themesByType } from '@/lib/themes';
-
-const allThemeIds = Object.values(themesByType).flat();
+import { EVENTS, isInviteType } from '@/lib/events';
 
 export default function CreatePage({
   searchParams,
 }: {
   searchParams: { type?: string; theme?: string };
 }) {
-  const rawType = searchParams.type;
-  const initialType: InviteType | undefined =
-    rawType === 'wedding' || rawType === 'birthday' ? rawType : undefined;
-
-  const rawTheme = searchParams.theme;
-  const initialTheme: ThemeId | undefined = allThemeIds.includes(rawTheme as ThemeId)
-    ? (rawTheme as ThemeId)
+  const initialType: InviteType | undefined = isInviteType(searchParams.type)
+    ? searchParams.type
     : undefined;
 
-  return <ConstructorForm initialType={initialType} initialTheme={initialTheme} />;
+  // Оформление принимаем, только если оно подходит выбранному виду события
+  const rawTheme = searchParams.theme as ThemeId | undefined;
+  const initialTheme: ThemeId | undefined =
+    initialType && rawTheme && EVENTS[initialType].themes.includes(rawTheme) ? rawTheme : undefined;
+
+  return (
+    <>
+      <SiteNav />
+      <ConstructorForm initialType={initialType} initialTheme={initialTheme} />
+    </>
+  );
 }

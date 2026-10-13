@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { ThemeId, InviteType } from '@/lib/types';
 import { themes } from '@/lib/themes';
+import { EVENTS } from '@/lib/events';
 import TemplateThumb from './TemplateThumb';
 
 export default function TemplateCard({
@@ -14,11 +15,11 @@ export default function TemplateCard({
 
   return (
     <Link href={`/create?type=${type}&theme=${themeId}`} className="group block">
-      <TemplateThumb themeId={themeId} />
+      <TemplateThumb themeId={themeId} type={type} />
       <div className="mt-3">
         <div className="text-sm font-medium text-gray-900">{t.label}</div>
         <div className="text-xs text-gray-500">
-          {t.style} · {type === 'wedding' ? 'Свадьба' : 'День рождения'}
+          {t.style} · {EVENTS[type].label}
         </div>
       </div>
     </Link>

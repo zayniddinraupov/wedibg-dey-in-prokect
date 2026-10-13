@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import { InviteConfig, ThemeId } from '@/lib/types';
 import Decorations from './Decorations';
+import { EVENTS, joinNames, subtitleOf } from '@/lib/events';
 
 const MONTHS = [
   'Январь',
@@ -33,9 +34,9 @@ export default function Hero({
   config: InviteConfig;
   theme: ThemeId;
 }) {
-  const names = config.name1 + (config.name2 ? ' & ' + config.name2 : '');
-  const kicker =
-    config.type === 'wedding' ? 'Приглашаем на свадьбу' : 'Праздник по случаю дня рождения';
+  const names = joinNames(config.type, config.name1, config.name2);
+  const subtitle = subtitleOf(config.type, config.name2);
+  const kicker = (EVENTS[config.type] || EVENTS.wedding).kicker;
   const hasPhoto = Boolean(config.coverPhoto);
 
   return (
@@ -52,6 +53,7 @@ export default function Hero({
       >
         <div className="kicker">{kicker}</div>
         <h1 className="names">{names}</h1>
+        {subtitle && <div className="subtitle">{subtitle}</div>}
         {config.intro && <p className="intro">{config.intro}</p>}
         {config.eventDate && <div className="month">{formatMonthYear(config.eventDate)}</div>}
       </motion.div>

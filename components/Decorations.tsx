@@ -24,6 +24,25 @@ function balloon(x: number, y: number, color: string) {
   </g>`;
 }
 
+// Восьмиконечная звезда (две квадратные «рамки», повёрнутые друг к другу) — основа восточного орнамента
+function star8(cx: number, cy: number, r: number, color: string, sw = 1.2, fill = 'none') {
+  return `<g transform="translate(${cx} ${cy})" fill="${fill}" stroke="${color}" stroke-width="${sw}"><rect x="${-r}" y="${-r}" width="${2 * r}" height="${2 * r}"/><rect x="${-r}" y="${-r}" width="${2 * r}" height="${2 * r}" transform="rotate(45)"/></g>`;
+}
+
+function diamondRow(y: number, from: number, to: number, step: number) {
+  let out = '';
+  let i = 0;
+  for (let x = from; x <= to; x += step, i++) {
+    const c = i % 2 === 0 ? 'var(--accent)' : 'var(--accent-2)';
+    out += `<path d="M${x - 8} ${y} L${x} ${y - 8} L${x + 8} ${y} L${x} ${y + 8} Z" fill="${c}" fill-opacity="0.18" stroke="${c}" stroke-width="1.1"/>`;
+  }
+  return out;
+}
+
+function starRow(y: number, xs: number[], r: number) {
+  return xs.map((x) => star8(x, y, r, 'var(--accent-2)', 1)).join('');
+}
+
 const decoMap: Record<ThemeId, string> = {
   botanical: svgWrap(
     `<g stroke="var(--accent)" stroke-width="2" fill="none" opacity="0.75"><path d="M28 40 C 50 60, 40 90, 60 110 M28 40 C 20 65, 30 85, 15 100 M28 40 C 45 35, 55 55, 70 55"/><path d="M372 560 C 350 540, 360 510, 340 490 M372 560 C 380 535, 370 515, 385 500 M372 560 C 355 565, 345 545, 330 545"/></g>`
@@ -57,6 +76,22 @@ const decoMap: Record<ThemeId, string> = {
       50,
       'var(--accent-3)'
     )}`
+  ),
+  gold: svgWrap(
+    `<rect x="18" y="18" width="364" height="564" fill="none" stroke="var(--accent)" stroke-width="1" opacity="0.7"/><rect x="26" y="26" width="348" height="548" fill="none" stroke="var(--accent)" stroke-width="0.8" opacity="0.35"/><g fill="var(--accent)"><path d="M18 12 L24 18 L18 24 L12 18Z"/><path d="M382 12 L388 18 L382 24 L376 18Z"/><path d="M18 576 L24 582 L18 588 L12 582Z"/><path d="M382 576 L388 582 L382 588 L376 582Z"/><path d="M200 12 L207 19 L200 26 L193 19Z"/><path d="M200 574 L207 581 L200 588 L193 581Z"/></g>`
+  ),
+  champagne: svgWrap(
+    `<g fill="none" stroke-width="1.3" opacity="0.75"><circle cx="40" cy="62" r="10" stroke="var(--accent-2)"/><circle cx="70" cy="40" r="5" stroke="var(--accent)"/><circle cx="54" cy="96" r="4" stroke="var(--accent)"/><circle cx="96" cy="70" r="3" stroke="var(--accent-2)"/><circle cx="360" cy="538" r="10" stroke="var(--accent-2)"/><circle cx="330" cy="560" r="5" stroke="var(--accent)"/><circle cx="346" cy="504" r="4" stroke="var(--accent)"/><circle cx="304" cy="530" r="3" stroke="var(--accent-2)"/></g>`
+  ),
+  samarkand: svgWrap(
+    `${star8(200, 34, 15, 'var(--accent)', 1.5)}<circle cx="200" cy="34" r="2.6" fill="var(--accent-2)"/>${starRow(34, [60, 100, 140, 260, 300, 340], 5)}${star8(200, 566, 15, 'var(--accent)', 1.5)}<circle cx="200" cy="566" r="2.6" fill="var(--accent-2)"/>${starRow(566, [60, 100, 140, 260, 300, 340], 5)}`
+  ),
+  saffron: svgWrap(`${diamondRow(24, 22, 378, 32)}${diamondRow(576, 22, 378, 32)}`),
+  emerald: svgWrap(
+    `<g fill="none" stroke="var(--accent)" stroke-width="1.2" opacity="0.75"><path d="M22 86 A64 64 0 0 1 86 22"/><path d="M378 86 A64 64 0 0 0 314 22"/><path d="M22 514 A64 64 0 0 0 86 578"/><path d="M378 514 A64 64 0 0 1 314 578"/></g>${star8(30, 30, 6, 'var(--accent-2)', 1)}${star8(370, 30, 6, 'var(--accent-2)', 1)}${star8(30, 570, 6, 'var(--accent-2)', 1)}${star8(370, 570, 6, 'var(--accent-2)', 1)}`
+  ),
+  pearl: svgWrap(
+    `${star8(200, 30, 10, 'var(--accent)', 1.3)}<g stroke="var(--accent-2)" stroke-width="1" opacity="0.8"><line x1="60" y1="30" x2="176" y2="30"/><line x1="224" y1="30" x2="340" y2="30"/><line x1="60" y1="570" x2="176" y2="570"/><line x1="224" y1="570" x2="340" y2="570"/></g>${star8(200, 570, 10, 'var(--accent)', 1.3)}`
   ),
 };
 

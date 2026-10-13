@@ -2,10 +2,11 @@
 
 import { motion } from 'framer-motion';
 import { InviteConfig } from '@/lib/types';
+import { EVENTS, joinNames } from '@/lib/events';
 
 export default function Closing({ config }: { config: InviteConfig }) {
-  const names = config.name1 + (config.name2 ? ' & ' + config.name2 : '');
-  const label = config.type === 'wedding' ? 'С любовью' : 'Ждём вас';
+  const names = joinNames(config.type, config.name1, config.name2);
+  const label = (EVENTS[config.type] || EVENTS.wedding).closing;
 
   return (
     <motion.section

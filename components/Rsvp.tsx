@@ -9,41 +9,45 @@ export default function Rsvp({ config }: { config: InviteConfig }) {
   const [status, setStatus] = useState('Приду');
   const [guests, setGuests] = useState(1);
   const [comment, setComment] = useState('');
+  const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
-  const [resultText, setResultText] = useState('');
+  const [saved, setSaved] = useState(false);
   const [copied, setCopied] = useState(false);
+
+  const whatsapp = config.rsvp?.whatsapp?.replace(/[^0-9]/g, '');
+  const email = config.rsvp?.email;
 
   const messageText = `RSVP от ${name}. Статус: ${status}. Гостей: ${guests}${
     comment ? '. Комментарий: ' + comment : ''
   }.`;
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    const whatsapp = config.rsvp?.whatsapp;
-    const email = config.rsvp?.email;
+    setSending(true);
 
-    if (whatsapp) {
-      const waUrl = `https://wa.me/${whatsapp.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(
-        messageText
-      )}`;
-      window.open(waUrl, '_blank');
-      setResultText('Открываем WhatsApp для отправки ответа…');
-    } else if (email) {
-      window.location.href = `mailto:${email}?subject=${encodeURIComponent(
-        'RSVP'
-      )}&body=${encodeURIComponent(messageText)}`;
-      setResultText('Открываем почтовый клиент…');
-    } else {
-      setResultText('Спасибо! Скопируйте ответ и отправьте организатору любым удобным способом.');
+    let ok = false;
+    // Если приглашение сохранено в базе — отправляем ответ организатору туда
+    if (config.slug) {
+      try {
+        const res = await fetch(`/api/invites/${config.slug}/rsvp`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, status, guests, comment }),
+        });
+        ok = res.ok;
+      } catch {
+        ok = false;
+      }
     }
+
+    setSaved(ok);
+    setSending(false);
     setSent(true);
   };
 
   const handleCopy = () => {
     navigator.clipboard.writeText(messageText).then(() => setCopied(true));
   };
-
-  const noContact = !config.rsvp?.whatsapp && !config.rsvp?.email;
 
   return (
     <motion.section
@@ -66,6 +70,7 @@ export default function Rsvp({ config }: { config: InviteConfig }) {
               type="text"
               placeholder="Ваше имя"
               value={name}
+              maxLength={100}
               onChange={(e) => setName(e.target.value)}
               required
             />
@@ -77,19 +82,20 @@ export default function Rsvp({ config }: { config: InviteConfig }) {
             <input
               type="number"
               min={1}
-              max={10}
+              max={20}
               value={guests}
               onChange={(e) => setGuests(Number(e.target.value))}
               placeholder="Количество гостей"
             />
             <textarea
               rows={2}
+              maxLength={500}
               placeholder="Комментарий (по желанию)"
               value={comment}
               onChange={(e) => setComment(e.target.value)}
             />
-            <button type="submit" className="rsvp-submit">
-              Отправить ответ
+            <button type="submit" className="rsvp-submit" disabled={sending}>
+              {sending ? 'Отправляем…' : 'Отправить ответ'}
             </button>
           </motion.form>
         ) : (
@@ -99,9 +105,35 @@ export default function Rsvp({ config }: { config: InviteConfig }) {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
           >
-            <div>{resultText}</div>
-            {noContact && (
-              <button onClick={handleCopy}>{copied ? 'Скопировано!' : 'Скопировать ответ'}</button>
+            {saved ? (
+              <div>Спасибо! Ваш ответ получен организатором.</div>
+            ) : (
+              <>
+                <div>Отправьте ответ организатору любым удобным способом:</div>
+                <div>
+                  {whatsapp && (
+                    <a
+                      href={`https://wa.me/${whatsapp}?text=${encodeURIComponent(messageText)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      WhatsApp
+                    </a>
+                  )}
+                  {email && (
+                    <a
+                      href={`mailto:${email}?subject=${encodeURIComponent(
+                        'RSVP'
+                      )}&body=${encodeURIComponent(messageText)}`}
+                    >
+                      Почта
+                    </a>
+                  )}
+                  <button type="button" onClick={handleCopy}>
+                    {copied ? 'Скопировано!' : 'Скопировать ответ'}
+                  </button>
+                </div>
+              </>
             )}
           </motion.div>
         )}
